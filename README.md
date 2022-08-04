@@ -8,7 +8,7 @@
 
 **Стек:**
 - Python >= 3.9
-- Django >= 3
+- Django >= 4.1
 - sqlite3
 
 ## Разработка
