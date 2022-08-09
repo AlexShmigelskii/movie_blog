@@ -32,6 +32,8 @@ class AddReview(View):
         if form.is_valid():
             form = form.save(commit=False)  # останавливаем сохранение нашей формы, чтобы внести изменения
             # form.movie_id = pk  # из таблицы movies_reviews взяли столбец, обозначенный как movie_id
+            if request.POST.get("parent", None):
+                form.parent_id = int(request.POST.get("parent"))
             form.movie = movie
             form.save()
         return redirect(movie.get_absolute_url())
