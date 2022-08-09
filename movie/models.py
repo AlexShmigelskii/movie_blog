@@ -5,7 +5,7 @@ from django.urls import reverse
 
 
 class Category(models.Model):
-    '''категории'''
+    '''Категории'''
     name = models.CharField('Категория', max_length=150)
     description = models.TextField('Описание')
     url = models.SlugField(max_length=160, unique=True)
@@ -48,6 +48,7 @@ class Genre(models.Model):
 
 
 class Movie(models.Model):
+    '''Фильмы'''
     title = models.CharField('Название фильма', max_length=100)
     tagline = models.CharField('Слоган', max_length=100, default='')
     description = models.TextField('Описание')
