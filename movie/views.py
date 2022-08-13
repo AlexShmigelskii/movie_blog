@@ -1,12 +1,23 @@
+from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views.generic.base import View
 
-from .models import Movie, Actor
-from .forms import ReviewFrom
+from .models import Movie, Actor, Genre, Rating
+from .forms import ReviewFrom, RatingForm
 
 
-class MovieView(ListView):
+class GenreYear:
+    '''Жанры и года выходов фильмов'''
+    def get_genre(self):
+        return Genre.objects.all()
+
+    def get_year(self):
+        return Movie.objects.filter(draft=False).values('year')
+
+
+class MovieView(GenreYear, ListView):
     '''Список фильмов'''
     model = Movie
     queryset = Movie.objects.filter(draft=False)  # не выводим те фильмы, которые помечены как "черновик"
@@ -15,13 +26,18 @@ class MovieView(ListView):
     # '<название приложения>/movie_list.html' =  'movie/movie_list.html'
 
 
-class MovieDetailView(DetailView):
+class MovieDetailView(GenreYear, DetailView):
     '''Полное описание фильма'''
     model = Movie
     slug_field = 'url'
     # template_name = 'movie/movie_detail.html'
     # не указываем template_name т к Django автоматически ищет его под названием
     # '<название приложения>/movie_detail.html' = 'movie/movie_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['star_form'] = RatingForm
+        return context
 
 
 class AddReview(View):
@@ -39,8 +55,41 @@ class AddReview(View):
         return redirect(movie.get_absolute_url())
 
 
-class ActorView(DetailView):
+class ActorView(GenreYear, DetailView):
     '''Вывод информации об актере'''
     model = Actor
     template_name = 'movie/actor.html'
     slug_field = 'name'
+
+
+class FilterMovie(GenreYear, ListView):
+    '''Фильтр фильмов'''
+    def get_queryset(self):
+        queryset = Movie.objects.filter(
+            Q(year__in=self.request.GET.getlist('year')) |  # логическое ИЛИ
+            Q(genre__in=self.request.GET.getlist('genre'))
+        )
+        return queryset
+
+
+class AddStarRating(View):
+    '''Добавление рейтинга фильму'''
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+    def post(self, request):
+        form = RatingForm(request.POST)
+        if form.is_valid():
+            Rating.objects.update_or_create(
+                ip=self.get_client_ip(request),
+                movie_id=int(request.POST.get('movie')),
+                defaults={'star_id': int(request.POST.get('star'))}
+            )
+            return HttpResponse(status=201)
+        else:
+            return HttpResponse(status=400)
