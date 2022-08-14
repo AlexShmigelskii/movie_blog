@@ -24,6 +24,7 @@ class MovieView(GenreYear, ListView):
     # template_name = 'movie/movie_list.html'
     # не указываем template_name т к Django автоматически ищет его под названием
     # '<название приложения>/movie_list.html' =  'movie/movie_list.html'
+    paginate_by = 2
 
 
 class MovieDetailView(GenreYear, DetailView):
@@ -64,12 +65,20 @@ class ActorView(GenreYear, DetailView):
 
 class FilterMovie(GenreYear, ListView):
     '''Фильтр фильмов'''
+    paginate_by = 1
+
     def get_queryset(self):
         queryset = Movie.objects.filter(
             Q(year__in=self.request.GET.getlist('year')) |  # логическое ИЛИ
             Q(genre__in=self.request.GET.getlist('genre'))
-        )
+        ).distinct()
         return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data()
+        context['year'] = ''.join([f'year={x}&' for x in self.request.GET.getlist('year')])
+        context['genre'] = ''.join([f'genre={x}&' for x in self.request.GET.getlist('genre')])
+        return context
 
 
 class AddStarRating(View):
