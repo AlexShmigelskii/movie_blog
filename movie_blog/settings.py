@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
 
     'movie',
+    'contact',
 
     'ckeditor',
     'ckeditor_uploader',
@@ -213,3 +214,12 @@ RECAPTCHA_DEFAULT_ACTION = 'generic'
 RECAPTCHA_SCORE_THRESHOLD = 0.5
 
 SITE_ID = 1
+
+# NOT WORKING!!!
+
+# # smtp
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = 'DJANGO5003626@gmail.com'
+# EMAIL_HOST_PASSWORD = 'DJANGO500'
+# EMAIL_PORT = 587
