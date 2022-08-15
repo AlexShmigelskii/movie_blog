@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views.generic.base import View
 
+
 from .models import Movie, Actor, Genre, Rating
 from .forms import ReviewFrom, RatingForm
 
@@ -37,7 +38,8 @@ class MovieDetailView(GenreYear, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['star_form'] = RatingForm
+        context['star_form'] = RatingForm()
+        context['form'] = ReviewFrom()
         return context
 
 
