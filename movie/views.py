@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.base import View
 
 
-from .models import Movie, Actor, Genre, Rating
+from .models import Movie, Actor, Genre, Rating, Category
 from .forms import ReviewFrom, RatingForm
 
 
@@ -117,3 +117,11 @@ class Search(ListView):
         context = super().get_context_data()
         context['s'] = f's={self.request.GET.get("s")}&'
         return context
+
+
+class CategoryFilter(ListView):
+    '''Фильмы по категориям'''
+    paginate_by = 2
+
+    def get_queryset(self):
+        return Movie.objects.filter(draft=False, category__url__contains=self.kwargs['slug'])
